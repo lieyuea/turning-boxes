@@ -1,5 +1,7 @@
-data
-fonts
-metadata
-sounds
-sprites
+app/repl.rb
+app/tests.rb
+data/
+fonts/
+metadata/
+sounds/
+sprites/

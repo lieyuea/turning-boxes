@@ -5,16 +5,9 @@ class Game
     @args = args
   end
 
-  def tick
-    inputs; update; render
-  end
+  def tick; calc; draw; end
 
-  def inputs
-  end
+  def calc; end
 
-  def update
-  end
-
-  def render
-  end
+  def draw; end
 end
