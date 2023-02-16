@@ -5,21 +5,20 @@ class Menu
 
   def initialize args
     @args = args
-    @play_button = {
-      x: args.grid.w_half - 50,
-      y: args.grid.h_half - 25,
-      w: 100,
-      h: 50
-    }
-    @play_button_text = {
+    @play_button_text, @play_button = {
       x: args.grid.w_half,
       y: args.grid.h_half,
       text: "(P)lay",
       alignment_enum: 1,
       vertical_alignment_enum: 1
+    }, {
+      x: args.grid.w_half - 50,
+      y: args.grid.h_half - 25,
+      w: 100,
+      h: 50
     }
 
-    outputs.static_borders << @play_button
+    args.outputs.static_borders << @play_button
     args.outputs.static_labels << @play_button_text
   end
 

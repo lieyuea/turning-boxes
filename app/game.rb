@@ -44,6 +44,7 @@ class Game
       a: 0
     }
     args.outputs.static_solids << [ @hover_marker, @marker ]
+    args.outputs.static_sprites << @boxes_arr.each
 
     init_new_game
   end
@@ -58,6 +59,7 @@ class Game
   def kb_controls
     key_pressed = keyboard.key_down.char
     return unless key_pressed
+
     case key_pressed
     when 'e', 'i'
       change_position :y, 1
@@ -96,6 +98,32 @@ class Game
   end
 
   def ms_controls
+    hover_mouse_position = nil
+    @layout.each do |x, y|
+      if inputs.mouse.inside_rect? @boxes[x][y]
+        hover_mouse_position = { x: x, y: y }
+        break
+      end
+    end
+
+    return @hover_marker.a = 0 unless hover_mouse_position
+
+    @hover_marker << {
+      x: @boxes[hover_mouse_position.x][hover_mouse_position.y].x - 5,
+      y: @boxes[hover_mouse_position.x][hover_mouse_position.y].y - 5
+    }
+    @hover_marker.a = 255
+
+    return unless inputs.mouse.click
+
+    @current_position = hover_mouse_position
+    move_marker
+
+    if inputs.mouse.button_left
+      turn_current_box 1
+    elsif inputs.mouse.button_right
+      turn_current_box -1
+    end
   end
 
   def current_box
@@ -112,8 +140,6 @@ class Game
 
     @current_position = { x: 0, y: 0 }
     move_marker
-
-    outputs.static_sprites << @boxes_arr.each
   end
 
   def draw
@@ -123,13 +149,12 @@ class Game
         y: 720,
         text: "Current box coord: #{@current_position}",
         alignment_enum: 2
-      },
-      {
+      }, {
         x: 1280,
         y: 700,
         text: "Current box angle: #{current_box.angle}",
         alignment_enum: 2
-      },
+      }
     ]
   end
 end
