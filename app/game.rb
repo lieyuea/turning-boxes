@@ -16,17 +16,12 @@ class Game
     @layout    = [-1, 0, 1].product [-1, 0, 1] # for iterating through @boxes with coords
     @boxes     = {} # gives boxes x and y coords
     @boxes_arr = [] # 1d array of all boxes for easier access
-    @spaces    = [] # base position of the variable spaces where the boxes can be
     # loop through @layout and put a box in every position of @boxes and add the same box
-    # to @boxes_arr, then add a position to @spaces based on the center of the grid.
+    # to @boxes_arr
     @layout.each do |x, y|
       @boxes[x]  ||= {}
       @boxes[x][y] = Box.new @boxsize
       @boxes_arr << @boxes[x][y]
-      @spaces << {
-        x: args.grid.w_half - @boxsize + @boxsize * 2 * x,
-        y: args.grid.h_half - @boxsize + @boxsize * 2 * y
-      }
     end
 
     @marker, @hover_marker = {
@@ -62,13 +57,13 @@ class Game
 
     case key_pressed
     when 'e', 'i'
-      change_position :y, 1
+      kb_change_position :y, 1
     when 'f', 'l'
-      change_position :x, 1
+      kb_change_position :x, 1
     when 'd', 'k'
-      change_position :y, -1
+      kb_change_position :y, -1
     when 's', 'j'
-      change_position :x, -1
+      kb_change_position :x, -1
     when 'w', 'u'
       turn_current_box 1
     when 'r', 'o'
@@ -76,13 +71,59 @@ class Game
     end
   end
 
-  def change_position coord, dir
+  def kb_change_position coord, dir
     @current_position[coord] += dir
     if @current_position[coord].abs > dir.abs
       @current_position[coord] = -dir
     end
 
     move_marker
+  end
+
+  def ms_controls
+    mouse_position = find_mouse
+
+    return @hover_marker.a = 0 unless mouse_position
+
+    set_hover_marker mouse_position
+    ms_change_position mouse_position
+  end
+
+  def find_mouse
+    mouse_position = nil
+    @layout.each do |x, y|
+      if inputs.mouse.inside_rect? @boxes[x][y]
+        mouse_position = { x: x, y: y }
+        break
+      end
+    end
+    mouse_position
+  end
+
+  def set_hover_marker mouse_position
+    @hover_marker << {
+      x: @boxes[mouse_position.x][mouse_position.y].x - 5,
+      y: @boxes[mouse_position.x][mouse_position.y].y - 5
+    }
+    @hover_marker.a = 255
+  end
+
+  def ms_change_position mouse_position
+    return unless inputs.mouse.click
+
+    dir = 0
+    case inputs.mouse.button_bits
+    when 1
+      dir = 1
+    when 4
+      dir = -1
+    else
+      return
+    end
+
+    @current_position = mouse_position
+    move_marker
+    turn_current_box dir
   end
 
   def move_marker
@@ -97,45 +138,16 @@ class Game
     end
   end
 
-  def ms_controls
-    hover_mouse_position = nil
-    @layout.each do |x, y|
-      if inputs.mouse.inside_rect? @boxes[x][y]
-        hover_mouse_position = { x: x, y: y }
-        break
-      end
-    end
-
-    return @hover_marker.a = 0 unless hover_mouse_position
-
-    @hover_marker << {
-      x: @boxes[hover_mouse_position.x][hover_mouse_position.y].x - 5,
-      y: @boxes[hover_mouse_position.x][hover_mouse_position.y].y - 5
-    }
-    @hover_marker.a = 255
-
-    return unless inputs.mouse.click
-
-    @current_position = hover_mouse_position
-    move_marker
-
-    if inputs.mouse.button_left
-      turn_current_box 1
-    elsif inputs.mouse.button_right
-      turn_current_box -1
-    end
-  end
-
   def current_box
     @boxes[@current_position.x][@current_position.y]
   end
 
   # TODO: randomize how many boxes show up, which boxes show up, what angle they have
   def init_new_game
-    @boxes_arr.size.times do |i|
-      @boxes_arr[i].x = @spaces[i].x + rand(@boxsize + 1)
-      @boxes_arr[i].y = @spaces[i].y + rand(@boxsize + 1)
-      @boxes_arr[i].angle = 90 * rand(4)
+    @layout.each do |x, y|
+      @boxes[x][y].x = grid.w_half - @boxsize + @boxsize * 2 * x + rand(@boxsize + 1)
+      @boxes[x][y].y = grid.h_half - @boxsize + @boxsize * 2 * y + rand(@boxsize + 1)
+      @boxes[x][y].angle = 90 * rand(4)
     end
 
     @current_position = { x: 0, y: 0 }
