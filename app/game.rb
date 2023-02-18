@@ -3,9 +3,9 @@ $gtk.reset seed: Time.now.to_i
 =begin
 Up to 9 boxes pointing different directions can spawn in a game.
 The goal is to get every box pointed in the same direction.
-Turning a box may turn other boxes. Some boxes cannot
-be directly interacted with.
-TODO: add basic controls
+Turning a box may turn other boxes. Some boxes cannot be directly
+interacted with.
+TODO: box connections and start new game
 =end
 class Game
   attr_gtk
@@ -14,8 +14,8 @@ class Game
     @args      = args
     @boxsize   = 80
     @layout    = [-1, 0, 1].product [-1, 0, 1] # for iterating through @boxes with coords
-    @boxes     = {} # gives boxes x and y coords
-    @boxes_arr = [] # 1d array of all boxes for easier access
+    @boxes     = {} # boxes with x and y coords
+    @boxes_arr = [] # 1d array of @boxes for easier access
     # loop through @layout and put a box in every position of @boxes and add the same box
     # to @boxes_arr
     @layout.each do |x, y|
@@ -33,8 +33,8 @@ class Game
     }, {
       w: @boxsize + 10,
       h: @boxsize + 10,
-      r: 255,
-      g: 128,
+      r: 0,
+      g: 255,
       b: 0,
       a: 0
     }
@@ -65,9 +65,9 @@ class Game
     when 's', 'j'
       kb_change_position :x, -1
     when 'w', 'u'
-      turn_current_box 1
+      current_box.turn 1
     when 'r', 'o'
-      turn_current_box -1
+      current_box.turn -1
     end
   end
 
@@ -81,23 +81,22 @@ class Game
   end
 
   def ms_controls
-    mouse_position = find_mouse
+    mouse_position = find_mouse_in_box
 
     return @hover_marker.a = 0 unless mouse_position
 
     set_hover_marker mouse_position
-    ms_change_position mouse_position
+    ms_change_position mouse_position if inputs.mouse.click
   end
 
-  def find_mouse
-    mouse_position = nil
+  def find_mouse_in_box
     @layout.each do |x, y|
       if inputs.mouse.inside_rect? @boxes[x][y]
-        mouse_position = { x: x, y: y }
-        break
+        return { x: x, y: y }
       end
     end
-    mouse_position
+
+    return nil
   end
 
   def set_hover_marker mouse_position
@@ -109,8 +108,6 @@ class Game
   end
 
   def ms_change_position mouse_position
-    return unless inputs.mouse.click
-
     dir = 0
     case inputs.mouse.button_bits
     when 1
@@ -123,19 +120,12 @@ class Game
 
     @current_position = mouse_position
     move_marker
-    turn_current_box dir
+    current_box.turn dir
   end
 
   def move_marker
     @marker << { x: current_box.x - 5, y: current_box.y - 5 }
     # @marker.x, @marker.y = current_box.x - 5, current_box.y - 5
-  end
-
-  def turn_current_box dir
-    current_box.angle += 90 * dir
-    if current_box.angle >= 360 || current_box.angle < 0
-      current_box.angle += 360 * -dir
-    end
   end
 
   def current_box
