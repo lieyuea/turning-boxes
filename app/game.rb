@@ -24,22 +24,14 @@ class Game
       @boxes_arr << @boxes[x][y]
     end
 
-    @marker, @hover_marker = {
-      w: @boxsize + 10,
-      h: @boxsize + 10,
-      r: 255,
-      g: 0,
-      b: 0
-    }, {
-      w: @boxsize + 10,
-      h: @boxsize + 10,
-      r: 0,
-      g: 255,
-      b: 0,
-      a: 0
-    }
+    @marker       = BoxMarker.new @boxsize, 255, 0, 0, 255
+    @hover_marker = BoxMarker.new @boxsize, 128, 255, 0, 0
     args.outputs.static_solids << [ @hover_marker, @marker ]
     args.outputs.static_sprites << @boxes_arr.each
+
+    @new_game_button = Button.new args.grid.left + 100, args.grid.bottom + 40, "(N)ew game"
+    args.outputs.static_borders << @new_game_button.border
+    args.outputs.static_labels << @new_game_button.label
 
     init_new_game
   end
@@ -55,6 +47,11 @@ class Game
     key_pressed = keyboard.key_down.char
     return unless key_pressed
 
+    case key_pressed
+    when 'n'
+      return init_new_game
+    end
+    # TODO add guard clause to prevent game controls when box is turning
     case key_pressed
     when 'e', 'i'
       kb_change_position :y, 1
@@ -81,6 +78,11 @@ class Game
   end
 
   def ms_controls
+    mouse = inputs.mouse
+    if inputs.mouse.inside_rect? @new_game_button
+      return init_new_game if inputs.mouse.click
+    end
+
     mouse_position = find_mouse_in_box
 
     return @hover_marker.a = 0 unless mouse_position
@@ -100,10 +102,8 @@ class Game
   end
 
   def set_hover_marker mouse_position
-    @hover_marker << {
-      x: @boxes[mouse_position.x][mouse_position.y].x - 5,
-      y: @boxes[mouse_position.x][mouse_position.y].y - 5
-    }
+    @hover_marker.x = @boxes[mouse_position.x][mouse_position.y].x - 5
+    @hover_marker.y = @boxes[mouse_position.x][mouse_position.y].y - 5
     @hover_marker.a = 255
   end
 
@@ -124,20 +124,22 @@ class Game
   end
 
   def move_marker
-    @marker << { x: current_box.x - 5, y: current_box.y - 5 }
-    # @marker.x, @marker.y = current_box.x - 5, current_box.y - 5
+    @marker.x, @marker.y = current_box.x - 5, current_box.y - 5
   end
 
   def current_box
     @boxes[@current_position.x][@current_position.y]
   end
 
-  # TODO: randomize how many boxes show up, which boxes show up, what angle they have
   def init_new_game
     @layout.each do |x, y|
       @boxes[x][y].x = grid.w_half - @boxsize + @boxsize * 2 * x + rand(@boxsize + 1)
       @boxes[x][y].y = grid.h_half - @boxsize + @boxsize * 2 * y + rand(@boxsize + 1)
       @boxes[x][y].angle = 90 * rand(4)
+      # TODO determine box linking
+      # rand(3).times do |linkbox|
+      #   @boxes[x][y].links << @boxes_arr[rand(@boxes_arr.size)]
+      # end
     end
 
     @current_position = { x: 0, y: 0 }

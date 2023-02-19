@@ -1,6 +1,7 @@
 $gtk.reset
 
 require 'app/box.rb'
+require 'app/button.rb'
 require 'app/game.rb'
 require 'app/menu.rb'
 
