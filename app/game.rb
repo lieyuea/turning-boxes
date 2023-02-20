@@ -5,7 +5,7 @@ Up to 9 boxes pointing different directions can spawn in a game.
 The goal is to get every box pointed in the same direction.
 Turning a box may turn other boxes. Some boxes cannot be directly
 interacted with.
-TODO: box connections and start new game
+TODO: Box linking and win checking
 =end
 class Game
   attr_gtk
@@ -51,7 +51,9 @@ class Game
     when 'n'
       return init_new_game
     end
-    # TODO add guard clause to prevent game controls when box is turning
+
+    return if @game_won
+
     case key_pressed
     when 'e', 'i'
       kb_change_position :y, 1
@@ -63,8 +65,10 @@ class Game
       kb_change_position :x, -1
     when 'w', 'u'
       current_box.turn 1
+      check_win
     when 'r', 'o'
       current_box.turn -1
+      check_win
     end
   end
 
@@ -82,6 +86,8 @@ class Game
     if inputs.mouse.inside_rect? @new_game_button
       return init_new_game if inputs.mouse.click
     end
+
+    return if @game_won
 
     mouse_position = find_mouse_in_box
 
@@ -121,6 +127,7 @@ class Game
     @current_position = mouse_position
     move_marker
     current_box.turn dir
+    check_win
   end
 
   def move_marker
@@ -131,7 +138,20 @@ class Game
     @boxes[@current_position.x][@current_position.y]
   end
 
+  def check_win
+    angle = @boxes_arr[0].angle
+    @boxes_arr.each do |box|
+      unless box.angle == angle
+        return
+      end
+    end
+
+    @game_won = true
+  end
+
   def init_new_game
+    @game_won = false
+
     @layout.each do |x, y|
       @boxes[x][y].x = grid.w_half - @boxsize + @boxsize * 2 * x + rand(@boxsize + 1)
       @boxes[x][y].y = grid.h_half - @boxsize + @boxsize * 2 * y + rand(@boxsize + 1)
@@ -157,6 +177,11 @@ class Game
         x: 1280,
         y: 700,
         text: "Current box angle: #{current_box.angle}",
+        alignment_enum: 2
+      }, {
+        x: 1280,
+        y: 680,
+        text: "Game won: #{@game_won}",
         alignment_enum: 2
       }
     ]
