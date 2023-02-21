@@ -1,11 +1,11 @@
 $gtk.reset seed: Time.now.to_i
 
 =begin
-Up to 9 boxes pointing different directions can spawn in a game.
+9 boxes pointing different directions can spawn in a game.
 The goal is to get every box pointed in the same direction.
 Turning a box may turn other boxes. Some boxes cannot be directly
 interacted with.
-TODO: Box linking
+TODO: Disable some boxes from interactability
 =end
 class Game
   attr_gtk
@@ -153,10 +153,13 @@ class Game
       @boxes[x][y].x = grid.w_half - @boxsize + @boxsize * 2 * x + rand(@boxsize + 1)
       @boxes[x][y].y = grid.h_half - @boxsize + @boxsize * 2 * y + rand(@boxsize + 1)
       @boxes[x][y].angle = 90 * rand(4)
-      # TODO determine box linking
-      # rand(3).times do |linkbox|
-      #   @boxes[x][y].links << @boxes_arr[rand(@boxes_arr.size)]
-      # end
+      @boxes[x][y].links.clear
+      rand(3).times do |linkbox|
+        linkbox = @boxes_arr[rand(@boxes_arr.size)]
+        unless linkbox == @boxes[x][y] || @boxes[x][y].links.include?(linkbox)
+          @boxes[x][y].links << linkbox
+        end
+      end
     end
 
     @current_position = { x: 0, y: 0 }
