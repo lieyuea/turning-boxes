@@ -26,14 +26,27 @@ class Game
 
     @marker       = BoxMarker.new @boxsize, 255, 0, 0, 255
     @hover_marker = BoxMarker.new @boxsize, 128, 255, 0, 0
-    args.outputs.static_solids << [ @hover_marker, @marker ]
+    args.outputs.static_solids  << [ @hover_marker, @marker ]
     args.outputs.static_sprites << @boxes_arr.each
 
     @new_game_button = Button.new args.grid.left + 100, args.grid.bottom + 40, "(N)ew game"
     args.outputs.static_borders << @new_game_button.border
-    args.outputs.static_labels << @new_game_button.label
+    args.outputs.static_labels  << @new_game_button.label
 
+    default_controls
     init_new_game
+  end
+
+  def default_controls
+    state.control_scheme = {
+      up:         ['e', 'i'],
+      down:       ['d', 'k'],
+      left:       ['s', 'j'],
+      right:      ['f', 'l'],
+      turn_left:  ['w', 'u'],
+      turn_right: ['r', 'o'],
+      new_game:   ['n'],
+    }
   end
 
   def tick; calc; draw; end
@@ -47,20 +60,22 @@ class Game
     key_pressed = keyboard.key_down.char
     return unless key_pressed
 
+    controls = state.control_scheme
+
     case key_pressed
-    when 'n'
+    when *controls[:new_game]
       return init_new_game
     end
 
     return if @game_won
 
     case key_pressed
-      when 'e', 'i' then kb_move_position :y,  1
-      when 'f', 'l' then kb_move_position :x,  1
-      when 'd', 'k' then kb_move_position :y, -1
-      when 's', 'j' then kb_move_position :x, -1
-      when 'w', 'u' then current_box.turn  1; check_win
-      when 'r', 'o' then current_box.turn -1; check_win
+      when *controls[:up]         then kb_move_position :y,  1
+      when *controls[:right]      then kb_move_position :x,  1
+      when *controls[:down]       then kb_move_position :y, -1
+      when *controls[:left]       then kb_move_position :x, -1
+      when *controls[:turn_left]  then current_box.turn  1; check_win
+      when *controls[:turn_right] then current_box.turn -1; check_win
     end
   end
 
