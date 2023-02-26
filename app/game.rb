@@ -55,20 +55,12 @@ class Game
     return if @game_won
 
     case key_pressed
-    when 'e', 'i'
-      kb_move_position :y, 1
-    when 'f', 'l'
-      kb_move_position :x, 1
-    when 'd', 'k'
-      kb_move_position :y, -1
-    when 's', 'j'
-      kb_move_position :x, -1
-    when 'w', 'u'
-      current_box.turn 1
-      check_win
-    when 'r', 'o'
-      current_box.turn -1
-      check_win
+      when 'e', 'i' then kb_move_position :y,  1
+      when 'f', 'l' then kb_move_position :x,  1
+      when 'd', 'k' then kb_move_position :y, -1
+      when 's', 'j' then kb_move_position :x, -1
+      when 'w', 'u' then current_box.turn  1; check_win
+      when 'r', 'o' then current_box.turn -1; check_win
     end
   end
 
