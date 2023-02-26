@@ -49,14 +49,9 @@ class Game
     }
   end
 
-  def tick; calc; draw; end
+  def tick; calc; debug; end
 
   def calc
-    kb_controls
-    ms_controls
-  end
-
-  def kb_controls
     key_pressed = keyboard.key_down.char
     return unless key_pressed
 
@@ -125,7 +120,7 @@ class Game
     move_marker
   end
 
-  def draw
+  def debug
     outputs.debug << [
       {
         x: 1280,
