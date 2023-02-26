@@ -70,70 +70,22 @@ class Game
     return if @game_won
 
     case key_pressed
-      when *controls[:up]         then kb_move_position :y,  1
-      when *controls[:right]      then kb_move_position :x,  1
-      when *controls[:down]       then kb_move_position :y, -1
-      when *controls[:left]       then kb_move_position :x, -1
-      when *controls[:turn_left]  then current_box.turn  1; check_win
-      when *controls[:turn_right] then current_box.turn -1; check_win
+      when *controls[:up]         then move_position :y,  1
+      when *controls[:right]      then move_position :x,  1
+      when *controls[:down]       then move_position :y, -1
+      when *controls[:left]       then move_position :x, -1
+      when *controls[:turn_left]  then current_box.turn   1; check_win
+      when *controls[:turn_right] then current_box.turn  -1; check_win
     end
   end
 
-  def kb_move_position coord, dir
+  def move_position coord, dir
     @current_position[coord] += dir
     if @current_position[coord].abs > dir.abs
       @current_position[coord] = -dir
     end
 
     move_marker
-  end
-
-  def ms_controls
-    if inputs.mouse.inside_rect? @new_game_button
-      return init_new_game if inputs.mouse.click
-    end
-
-    return if @game_won
-
-    on_box = find_mouse_in_box
-
-    return @hover_marker.a = 0 unless on_box
-
-    set_hover_marker on_box
-    ms_move_position on_box if inputs.mouse.click
-  end
-
-  def find_mouse_in_box
-    @layout.each do |x, y|
-      if inputs.mouse.inside_rect? @boxes[x][y]
-        return { x: x, y: y }
-      end
-    end
-
-    return nil
-  end
-
-  def set_hover_marker on_box
-    @hover_marker.x = @boxes[on_box.x][on_box.y].x - 5
-    @hover_marker.y = @boxes[on_box.x][on_box.y].y - 5
-    @hover_marker.a = 255
-  end
-
-  def ms_move_position on_box
-    dir = 0
-    case inputs.mouse.button_bits
-    when 1
-      dir = 1
-    when 4
-      dir = -1
-    else
-      return
-    end
-
-    @current_position = on_box
-    move_marker
-    current_box.turn dir
-    check_win
   end
 
   def move_marker
