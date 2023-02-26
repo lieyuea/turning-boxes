@@ -23,15 +23,3 @@ class Box
     end
   end
 end
-
-class BoxMarker
-  attr_sprite
-
-  def initialize size, r, g, b, a
-    @w = @h = size + 10
-    @r = r
-    @g = g
-    @b = b
-    @a = a
-  end
-end
