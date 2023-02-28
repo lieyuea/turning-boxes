@@ -36,7 +36,7 @@ class Game
     init_new_game
   end
 
-  def tick; calc; draw; end
+  def tick; calc; debug; end
 
   def calc
     kb_controls
@@ -158,7 +158,7 @@ class Game
     move_marker
   end
 
-  def draw
+  def debug
     outputs.debug << [
       {
         x: 1280,
