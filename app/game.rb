@@ -24,8 +24,8 @@ class Game
       @boxes_arr << @boxes[x][y]
     end
 
-    @marker       = BoxMarker.new @boxsize, 255, 0, 0, 255
-    @hover_marker = BoxMarker.new @boxsize, 128, 255, 0, 0
+    @marker       = { w: @boxsize + 10, h: @boxsize + 10, r: 255 }
+    @hover_marker = { w: @boxsize + 10, h: @boxsize + 10, g: 255 }
     args.outputs.static_solids << [ @hover_marker, @marker ]
     args.outputs.static_sprites << @boxes_arr.each
 
