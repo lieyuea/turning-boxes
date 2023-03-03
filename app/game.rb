@@ -49,7 +49,11 @@ class Game
     }
   end
 
-  def tick; calc; debug; end
+  def tick args
+    @args = args
+    calc
+    debug
+  end
 
   def calc
     kb_controls
@@ -61,12 +65,12 @@ class Game
     return unless key_pressed
 
     case key_pressed
-      when *@controls.up         then kb_move_position :y,  1        unless @game_won
-      when *@controls.down       then kb_move_position :y, -1        unless @game_won
-      when *@controls.left       then kb_move_position :x, -1        unless @game_won
-      when *@controls.right      then kb_move_position :x,  1        unless @game_won
-      when *@controls.turn_left  then current_box.turn  1; check_win unless @game_won
-      when *@controls.turn_right then current_box.turn -1; check_win unless @game_won
+      when *@controls.up         then kb_move_position :y,  1 unless @game_won
+      when *@controls.down       then kb_move_position :y, -1 unless @game_won
+      when *@controls.left       then kb_move_position :x, -1 unless @game_won
+      when *@controls.right      then kb_move_position :x,  1 unless @game_won
+      when *@controls.turn_left  then kb_turn_box  1          unless @game_won
+      when *@controls.turn_right then kb_turn_box -1          unless @game_won
       when *@controls.new_game   then init_new_game
     end
   end
@@ -78,6 +82,11 @@ class Game
     end
 
     move_marker
+  end
+
+  def kb_turn_box dir
+    current_box.turn dir
+    check_win
   end
 
   def ms_controls
