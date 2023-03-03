@@ -33,7 +33,20 @@ class Game
     args.outputs.static_borders << @new_game_button.border
     args.outputs.static_labels << @new_game_button.label
 
+    default_controls
     init_new_game
+  end
+
+  def default_controls
+    @controls = {
+      up:         ['e', 'i'],
+      down:       ['d', 'k'],
+      left:       ['s', 'j'],
+      right:      ['f', 'l'],
+      turn_left:  ['w', 'u'],
+      turn_right: ['r', 'o'],
+      new_game:   ['n'],
+    }
   end
 
   def tick; calc; debug; end
@@ -48,19 +61,13 @@ class Game
     return unless key_pressed
 
     case key_pressed
-    when 'n'
-      return init_new_game
-    end
-
-    return if @game_won
-
-    case key_pressed
-      when 'e', 'i' then kb_move_position :y,  1
-      when 'f', 'l' then kb_move_position :x,  1
-      when 'd', 'k' then kb_move_position :y, -1
-      when 's', 'j' then kb_move_position :x, -1
-      when 'w', 'u' then current_box.turn  1; check_win
-      when 'r', 'o' then current_box.turn -1; check_win
+      when *@controls.up         then kb_move_position :y,  1        unless @game_won
+      when *@controls.down       then kb_move_position :y, -1        unless @game_won
+      when *@controls.left       then kb_move_position :x, -1        unless @game_won
+      when *@controls.right      then kb_move_position :x,  1        unless @game_won
+      when *@controls.turn_left  then current_box.turn  1; check_win unless @game_won
+      when *@controls.turn_right then current_box.turn -1; check_win unless @game_won
+      when *@controls.new_game   then init_new_game
     end
   end
 
