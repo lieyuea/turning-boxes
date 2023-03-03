@@ -6,7 +6,7 @@ require 'app/game.rb'
 require 'app/menu.rb'
 
 def tick args
-  args.state.gamestate ||= Menu.new args
+  args.state.gamestate ||= Game.new args
   args.state.gamestate.args = args
   args.state.gamestate.tick
 
