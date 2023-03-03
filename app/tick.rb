@@ -1,8 +1,8 @@
-$game = Game.new $args
+@game = Game.new $args
 
 def tick args
-  $game.args = args
-  $game.tick
+  @game.args = args
+  @game.tick
 
   args.outputs.debug << [
     {
@@ -13,10 +13,6 @@ def tick args
       x: 0,
       y: 700,
       text: "framerate: #{args.gtk.current_framerate}"
-    }, {
-      x: 0,
-      y: 680,
-      text: "state: #{args.state.gamestate.class}"
     }
   ]
 end
