@@ -1,8 +1,7 @@
-@game = Game.new $args
+$scene = Game.new $args
 
 def tick args
-  @game.args = args
-  @game.tick
+  $scene.tick args
 
   args.outputs.debug << [
     {
